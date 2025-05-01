@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Recommender System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('news') }}">News</a></li>
+            <li><a href="{{ url_for('blogs') }}">Blogs</a></li>
+            <li><a href="{{ url_for('music') }}">Music</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script>
+        function getRecommendations(contentType, itemId, resultDivId) {
+            fetch(`/recommend/${contentType}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `item_id=${itemId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById(resultDivId);
+                resultDiv.innerHTML = '<h4>Recommended Items:</h4>';
+                
+                data.forEach(item => {
+                    const itemText = contentType === 'music' 
+                        ? `${item.title} by ${item.artist} (similarity: ${item.score})`
+                        : `${item.title} (similarity: ${item.score})`;
+                    resultDiv.innerHTML += `<p>${itemText}</p>`;
+                });
+                
+                resultDiv.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
